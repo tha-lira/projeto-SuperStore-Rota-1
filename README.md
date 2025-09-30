@@ -13,7 +13,7 @@ A seguir, estão os principais componentes e entregas deste projeto:
 📌 [Relatório Completo](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Relatorio-estruturaDeDados.md)
 Visão geral da modelagem, arquitetura e principais decisões de design.
 
-📌 [Consultas no BigQuery] (https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/BigQuery-estruturaDeDados.md)
+📌 [Consultas no BigQuery](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/BigQuery-estruturaDeDados.md)
 Consultas SQL para análise de vendas, clientes, produtos e desempenho por região.
 
 📌 [Estrutura do modelo dimensional](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Estrutura_Modelo_Dimesional.md)
