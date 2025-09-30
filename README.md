@@ -1,13 +1,23 @@
-# Projeto de Exploração – Estrutura de Dados (ETL)
+# 🧪 Projeto de Exploração – Estrutura de Dados (ETL)
 
-A loja Super Store enfrenta o desafio de lidar com grandes volumes de dados dispersos e não estruturados. Para enfrentar esse problema e impulsionar a tomada de decisões informadas, propõe-se a implementação de um robusto sistema ETL (Extract, Transform, Load) com tabelas de Fatos e Dimensões. Este projeto concentra-se na criação de um sistema abrangente que permita extrair dados de diversas fontes, transformá-los conforme as necessidades específicas da Super Store e carregá-los de forma eficiente em um Data warehouse organizado. Além disso, objetiva-se aumentar a capacidade da Super Store de identificar padrões, tendências e oportunidades de mercado.
+A Super Store enfrenta o desafio de lidar com grandes volumes de dados dispersos e não estruturados. Para resolver esse problema e impulsionar a tomada de decisões estratégicas, propõe-se a implementação de um sistema robusto de ETL (Extract, Transform, Load) com base em um modelo de dados dimensional (Fato e Dimensões).
 
-O processo de ETL consiste basicamente em 3 etapas:
-
-- Extração: durante esta fase, os dados são extraídos de uma ou mais fontes de dados, que podem ser base de dados, arquivos planos, serviços web ou outras fontes. A extração envolve a coleta das informações necessárias para o processamento posterior.
-
-- Transformação: Nesta etapa, os dados extraídos são transformados conforme os requisitos do sistema. As transformações podem incluir limpeza de dados, conversão de formatos, combinação de dados de múltiplas fontes, filtragem e outras operações que garantam que os dados sejam consistentes e úteis para a análise.
-
-- Carregamento: A fase final envolve carregar os dados transformados no sistema de destino, que geralmente é um Data Warehouse ou base de dados projetados para análise de negócios, como o BigQuery. Só então, os dados estão prontos para as consultas e análises desejadas.
+Este projeto tem como objetivo desenvolver uma estrutura abrangente que permita extrair dados de diversas fontes, transformá-los conforme as necessidades analíticas da Super Store e carregá-los de forma eficiente em um Data Warehouse (como o Google BigQuery). Com isso, a empresa poderá identificar padrões de comportamento, tendências de mercado e oportunidades de negócio com maior precisão e velocidade.
 
 ---
+
+🧭 Documentação Técnica
+
+A seguir, estão os principais componentes e entregas deste projeto:
+
+📌 [Relatório Completo](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Relatorio-estruturaDeDados.md)
+Visão geral da modelagem, arquitetura e principais decisões de design.
+
+📌 [Consultas no BigQuery] (https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/BigQuery-estruturaDeDados.md)
+Consultas SQL para análise de vendas, clientes, produtos e desempenho por região.
+
+📌 [Estrutura do modelo dimensional](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Estrutura_Modelo_Dimesional.md)
+Modelo em Estrela com a tabela fato central e tabelas de dimensão relacionadas.
+
+📌 [Dataset Original](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Dataset-Original.md)
+Dicionário de dados completo com tipos, exemplos e descrições das variáveis.
