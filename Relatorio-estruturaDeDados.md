@@ -8,15 +8,11 @@ A Super Store precisa organizar e estruturar seus dados para facilitar consultas
 **Objetivo:**  
 Construir um sistema tabular relacional utilizando o modelo dimensional, com tabelas fato e dimensão, alimentado por um processo ETL (Extract, Transform, Load).
 
----
-
 ### 🔵  Conexão e Importação dos Dados
 
 - **Projeto ID:** `estrutura-de-dados-473122`  
 - **Dataset Principal:** `dataBase`  
 - **Tabela Bruta:** `superstore`
-
----
 
 ## Qualidade dos Dados
 
@@ -25,8 +21,6 @@ Construir um sistema tabular relacional utilizando o modelo dimensional, com tab
 A query `SUM(CASE WHEN coluna IS NULL THEN 1 ELSE 0 END)` foi aplicada para todas as colunas da base `superstore`.  
 
 **Resultado:** Nenhuma coluna apresentou valores nulos entre as 51.290 linhas avaliadas.
-
----
 
 ### 🔵  Identificação de duplicados
 
@@ -51,8 +45,6 @@ Os 35 registros duplicados eram idênticos em todas as colunas-chave, indicando 
 ### ✅ Ação Tomada
 
 Foi criada a tabela intermediária `superstore_cleaned` com as duplicatas removidas, garantindo a integridade das futuras tabelas fato e dimensão.
-
----
 
 ### 🔵 Identificar Dados Discrepantes
 
@@ -94,8 +86,6 @@ A análise da tabela FactSales mostrou que 12.541 registros (24,5%) apresentaram
 
 Essa análise ajuda a entender o impacto dos descontos no lucro e direciona ações para melhorar a rentabilidade.
 
----
-
 ### 📌 Tratamento e Criação da Tabela Intermediária
 
 Tabela Intermediária: `superstore_cleaned`
@@ -103,13 +93,12 @@ Tabela Intermediária: `superstore_cleaned`
 **Variáveis disponíveis:**  
 `customer_ID, customer_name, segment, product_id, product_name, category, sub_category, order_id, row_id, order_date, ship_date, sales, profit, quantity, discount, shipping_cost, order_priority, ship_mode, region, city, state, country, market, market2, year, weeknum, unknown, rn`
 
----
-
-### Pesquisar dados de outras fontes
+### 🔵 Pesquisar dados de outras fontes
 
 Integrar dados de concorrentes multinacionais ao projeto da Super Store por meio de extração automática de informações (web scraping), utilizando a função IMPORTHTML do Google Planilhas.
 
 Ferramenta Utilizada, Foi o Google Planilhas com a função:
+
 ```
 =IMPORTHTML("https://en.wikipedia.org/wiki/List_of_supermarket_chains","table",1)
 ```
@@ -122,27 +111,48 @@ A tabela utilizada contém cadeias de supermercados multinacionais e regionais, 
 
 ### 🔵   Projetar estrutura de base de dados (tabelas de fatos e dimensões)
 
-Foi adotado o **modelo dimensional** (star schema), em que:
+Foi adotado o modelo dimensional (star schema), em que:
 
-- Tabelas de dimensão armazenam atributos descritivos das entidades do negócio (quem, o quê, onde, quando).
+Tabelas de Dimensão: armazenam atributos descritivos das entidades do negócio (quem, o quê, onde, quando).
 
-- Tabela fato registra eventos transacionais com métricas quantitativas (vendas, lucro, quantidade).
+Tabela Fato: registra eventos transacionais com métricas quantitativas (vendas, lucro, quantidade).
 
-As tabelas foram criadas a partir da base limpa (`superstore_cleaned`) utilizando comandos `CREATE TABLE AS SELECT`, promovendo consistência, organização e melhor performance em consultas analíticas.
+As tabelas foram criadas a partir da base limpa (superstore_cleaned) por meio de comandos CREATE TABLE AS SELECT, garantindo consistência, organização e performance nas consultas analíticas.
 
-### 📌 Padronização dos Dados
+📝 **Padronização dos Dados**
 
-Durante a construção das tabelas, as variáveis categóricas foram padronizadas com LOWER() para evitar discrepâncias de caixa (maiúsculas/minúsculas). Além disso, as dimensões foram deduplicadas e receberam chaves estáveis geradas por `FARM_FINGERPRINT` (surrogate keys), mantendo os identificadores naturais (ex.: `customer_ID`, `product_id`) para rastreabilidade.
+Variáveis categóricas foram transformadas com LOWER() e TRIM() para evitar discrepâncias de formatação (maiúsculas, espaços extras).
+
+As dimensões foram deduplicadas para garantir unicidade.
+
+Foram atribuídas chaves substitutas estáveis (FARM_FINGERPRINT) para relacionamento entre tabelas, mantendo também os IDs naturais (ex.: customer_ID, product_id) para rastreabilidade.
+
+Para apoiar a construção do **modelo dimensional**, utilizei a ferramenta `Lucidchart`, que permitiu representar visualmente o relacionamento entre a tabela fato (FactSales) e as tabelas de dimensão (DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket).
+
+No diagrama, a tabela fato (FactSales) está no centro, conectada às tabelas de dimensão (DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket). Essa estrutura em estrela facilita análises por diferentes perspectivas, como clientes, produtos, regiões, datas e modos de envio. Esse diagrama facilita a compreensão da estrutura em estrela (Star Schema) e como as chaves primárias das dimensões se conectam às chaves estrangeiras da tabela fato.
+
+📌 Link para visualização do esquema no Lucidchart:
+👉 [Clique aqui para acessar o diagrama](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Modelo%20Dimensional%20-%20An%C3%A1lise%20de%20Vendas%20(Star%20Schema).pdf)
 
 ### 🔵  Criar estrutura de base de dados (tabelas de fatos e dimensões)
 
-### 📌 Observações Técnicas
+As tabelas de fatos e dimensões foram implementadas no BigQuery seguindo as boas práticas de modelagem dimensional. O modelo adota:
 
-- Todas as tabelas foram construídas com base no conceito de **modelagem estrela**.
-- As **chaves primárias** das tabelas de dimensão foram utilizadas como **chaves estrangeiras** na tabela fato.
-- Para manter unicidade e performance, IDs foram gerados usando funções de hash (`FARM_FINGERPRINT`) em colunas compostas.
-- A tabela `FactSales` contém apenas dados normalizados e referenciados, mantendo o armazenamento eficiente e preparado para consultas OLAP.
+FactSales: núcleo central do esquema estrela, com métricas de vendas.
 
---->  Link
+DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket: dimensões que fornecem contexto descritivo às análises.
+
+📝 **Observações Técnicas**
+
+O modelo segue a modelagem estrela, favorecendo simplicidade e eficiência em consultas OLAP.
+
+Chaves primárias das dimensões foram usadas como chaves estrangeiras na fato.
+
+IDs gerados via FARM_FINGERPRINT asseguram unicidade e performance em joins.
+
+A tabela FactSales contém apenas dados normalizados e referenciados, otimizando armazenamento e processamento.
+
+📌 Link para visualização do esquema:
+👉 [Clique aqui para acessar a Estrutura do modelo dimensional](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Estrutura_Modelo_Dimesional.md)
   
 ### 🔵  Agendar atualizações de tabelas
