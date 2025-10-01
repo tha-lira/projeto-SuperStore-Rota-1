@@ -2,11 +2,13 @@
 
 ### Entendimento do Problema
 
-**Contexto:**  
+**Contexto**:
 A Super Store precisa organizar e estruturar seus dados para facilitar consultas, análises e decisões estratégicas.
 
-**Objetivo:**  
+**Objetivo**:
 Construir um sistema tabular relacional utilizando o modelo dimensional, com tabelas fato e dimensão, alimentado por um processo ETL (Extract, Transform, Load).
+
+## 🟦 2.1 Processar e preparar base de dados
 
 ### 🔵  Conexão e Importação dos Dados
 
@@ -14,21 +16,19 @@ Construir um sistema tabular relacional utilizando o modelo dimensional, com tab
 - **Dataset Principal:** `dataBase`  
 - **Tabela Bruta:** `superstore`
 
-## Qualidade dos Dados
+### 🔵 Identificar e tratar valores nulos
 
-### 🔵  Verificação de nulos
-
-A query `SUM(CASE WHEN coluna IS NULL THEN 1 ELSE 0 END)` foi aplicada para todas as colunas da base `superstore`.  
+Foi aplicada a query `SUM(CASE WHEN coluna IS NULL THEN 1 ELSE 0 END)` em todas as colunas da base `superstore`.  
 
 **Resultado:** Nenhuma coluna apresentou valores nulos entre as 51.290 linhas avaliadas.
 
-### 🔵  Identificação de duplicados
+### 🔵  Identificar e tratar valores duplicados
 
-Foi realizada uma análise de duplicidade em diferentes níveis:
+A análise de duplicidade foi realizada em diferentes níveis:
 
-- Inicialmente, 38 duplicatas foram encontradas usando `order_id + product_id`.
-- Refinando com `customer_ID + region + product_name`, o total caiu para 33.
-- A verificação final considerou a chave composta:
+- 1ª verificação: `order_id + product_id` → encontrados 38 duplicados.
+- 2ª verificação (mais refinada):` customer_ID + region + product_name` → total caiu para 33.
+- Verificação final: construída chave composta (`customer_ID + order_id + product_id + order_date + ship_date`) para confirmar duplicados reais.
 
 **Resultado final:**
 
@@ -38,31 +38,25 @@ Foi realizada uma análise de duplicidade em diferentes níveis:
 | Linhas únicas   | 51.255  |
 | Duplicados      | 35      |
 
-### Interpretação
+📌 **Interpretação**: Os 35 registros duplicados eram idênticos em todas as colunas-chave, indicando redundância sem informação nova. Se não tratados, poderiam distorcer métricas como vendas, lucro e quantidade.
 
-Os 35 registros duplicados eram idênticos em todas as colunas-chave, indicando redundância sem novas informações. A presença dessas duplicatas poderia distorcer as análises de vendas, lucro e quantidade.
+✅ **Ação Tomada**: Foi criada a tabela intermediária `superstore_cleaned` com as duplicatas removidas, garantindo a integridade das futuras tabelas fato e dimensão.
 
-### ✅ Ação Tomada
+### 🔵 Identificar e tratar dados discrepantes 
 
-Foi criada a tabela intermediária `superstore_cleaned` com as duplicatas removidas, garantindo a integridade das futuras tabelas fato e dimensão.
+Também foi realizada uma análise de possíveis inconsistências em variáveis numéricas e categóricas.
 
-### 🔵 Identificar Dados Discrepantes
+- **Padronização aplicada**: funções LOWER() e TRIM() em variáveis de texto para evitar discrepâncias de maiúsculas/minúsculas ou espaços extras.
 
-Foi realizada uma consulta SQL para identificar possíveis inconsistências em variáveis numéricas da base de dados, tais como valores nulos, valores negativos ou valores fora do intervalo esperado.
+- **FactSales**: 51.255 registros válidos, sem valores nulos nas métricas principais.
 
-Durante a criação das tabelas fato e dimensão, foi aplicado o uso da função `LOWER()` para as variáveis categóricas, garantindo a padronização dos dados em letras minúsculas. Isso evita inconsistências causadas por variações de maiúsculas/minúsculas e facilita análises posteriores.
+- **Profit (Lucro**): 12.541 registros (24,5%) com valores negativos, possivelmente indicando devoluções, descontos excessivos ou ajustes financeiros.
 
-Foi realizada a verificação das principais tabelas da base de dados para identificar inconsistências  numéricas e textuais.
-
-Na tabela **FactSales**, que contém 51.255 registros, não foram encontrados valores nulos nas chaves ou métricas principais. No entanto, foram identificados 12.541 registros com valores negativos na coluna de lucro (`profit`). Isso pode indicar devoluções, descontos ou ajustes financeiros que precisam ser analisados.
-
-Nas tabelas de dimensão **DimCustomer**, **DimProduct**, **DimDate**, **DimRegion**, **DimShipMode** e **DimMarket**, não foram encontradas inconsistências relevantes, como valores nulos ou fora do esperado, nas colunas analisadas.
+- Demais dimensões (DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode e DimMarket): nenhuma inconsistência relevante foi identificada.
 
 ### 🔷 Análise de Lucro Negativo
 
-A análise da tabela FactSales mostrou que 12.541 registros (24,5%) apresentaram profit < 0. Para investigar esse padrão, os registros foram segmentados por faixa de desconto, avaliando a relação entre descontos concedidos e ocorrência de prejuízo
-
-### Resultados da Análise
+Os registros de lucro negativo foram segmentados por faixa de desconto:
 
 | Faixa de Desconto | Total de Registros | Registros com Lucro Negativo | % Lucro Negativo |
 |-------------------|--------------------|------------------------------|------------------|
@@ -72,21 +66,19 @@ A análise da tabela FactSales mostrou que 12.541 registros (24,5%) apresentaram
 | 21% a 30%         | 924                | 575                          | 62,23%           |
 | > 30%             | 10.360             | 9.578                        | 92,45%           |
 
-### 📌 Interpretação
+📌**Interpretação**
 
-- A grande maioria dos pedidos sem desconto apresenta lucro positivo.
-- À medida que o desconto aumenta, a porcentagem de registros com lucro negativo cresce significativamente.
-- Pedidos com desconto superior a 30% apresentam uma alta incidência (92,45%) de lucro negativo, indicando que esses descontos provavelmente estão causando prejuízo nas vendas.
+- Pedidos sem desconto quase sempre geram lucro.
 
-### ✅ Considerações Finais
+- À medida que o desconto aumenta, cresce a incidência de prejuízo.
 
-- Esse padrão sugere que o lucro negativo está fortemente associado a descontos elevados.
-- É importante investigar se os descontos altos são intencionais (promoções ou liquidações) ou representam problemas como erros de cálculo ou políticas inadequadas de desconto.
-- Recomenda-se monitorar e revisar a política de descontos para assegurar a saúde financeira do negócio.
+- Acima de 30% de desconto, a maioria esmagadora dos pedidos gera lucro negativo (92,45%).
 
-Essa análise ajuda a entender o impacto dos descontos no lucro e direciona ações para melhorar a rentabilidade.
+✅ **Considerações Finais**
 
-### 📌 Tratamento e Criação da Tabela Intermediária
+Esse padrão sugere forte impacto dos descontos elevados na rentabilidade. Recomenda-se revisar a política de descontos e investigar se esses valores decorrem de promoções planejadas ou de falhas nos processos de precificação.
+
+### 🔷 Tabela Intermediária Criada
 
 Tabela Intermediária: `superstore_cleaned`
 
@@ -95,64 +87,82 @@ Tabela Intermediária: `superstore_cleaned`
 
 ### 🔵 Pesquisar dados de outras fontes
 
-Integrar dados de concorrentes multinacionais ao projeto da Super Store por meio de extração automática de informações (web scraping), utilizando a função IMPORTHTML do Google Planilhas.
+Para enriquecer a análise, foram integrados dados de concorrentes multinacionais de supermercados.
 
-Ferramenta Utilizada, Foi o Google Planilhas com a função:
+📌 **Coleta dos Dados**
+A extração foi realizada por meio de web scraping com a função IMPORTHTML do Google Planilhas, aplicada à página da Wikipedia:
 
 ```
 =IMPORTHTML("https://en.wikipedia.org/wiki/List_of_supermarket_chains","table",1)
 ```
+
+A tabela original apresentava as seguintes colunas: Company, Headquarters, Served countries, Map, Number of locations e Number of employees.
+
+📌**Tratamento**
+
+**Mantidas**: Company, Headquarters, Served countries (colunas consistentes).
+**Descartadas**: Map, Number of locations, Number of employees (alto volume de nulos e baixa relevância).
+**Tratamento extra**: registros sem valores em Company ou Headquarters foram removidos.
+
+**Resultado Final**
+Tabela com informações limpas de empresas, suas sedes e países de atuação. Esse conjunto poderá ser usado como benchmarking internacional para comparar a presença da Super Store frente a grandes redes globais.
+
 📚 Fonte dos Dados
+👉 [Wikipedia – List of supermarket chains](https://en.wikipedia.org/wiki/List_of_supermarket_chains)
 
-Página da Wikipedia:
-https://en.wikipedia.org/wiki/List_of_supermarket_chains
+### 🔵 Projetar estrutura de base de dados (tabelas de fatos e dimensões)
 
-A tabela utilizada contém cadeias de supermercados multinacionais e regionais, organizadas por país e continente.
+Foi adotado o modelo dimensional (star schema), no qual:
 
-### 🔵   Projetar estrutura de base de dados (tabelas de fatos e dimensões)
+**Tabelas de Dimensão** → armazenam atributos descritivos (quem, o quê, onde, quando).
 
-Foi adotado o modelo dimensional (star schema), em que:
+**Tabela Fato** → registra eventos transacionais e métricas (vendas, lucro, quantidade).
 
-Tabelas de Dimensão: armazenam atributos descritivos das entidades do negócio (quem, o quê, onde, quando).
+📌 **Padronização**
 
-Tabela Fato: registra eventos transacionais com métricas quantitativas (vendas, lucro, quantidade).
+- Uso de LOWER() e TRIM() para evitar inconsistências textuais.
 
-As tabelas foram criadas a partir da base limpa (superstore_cleaned) por meio de comandos CREATE TABLE AS SELECT, garantindo consistência, organização e performance nas consultas analíticas.
+- Deduplicação das dimensões.
 
-📝 **Padronização dos Dados**
+- Criação de surrogate keys com FARM_FINGERPRINT, mantendo IDs naturais para rastreabilidade.
 
-Variáveis categóricas foram transformadas com LOWER() e TRIM() para evitar discrepâncias de formatação (maiúsculas, espaços extras).
+📌 **Modelagem Visual**
+O modelo foi representado no Lucidchart, destacando a FactSales no centro, conectada às dimensões DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode e DimMarket.
 
-As dimensões foram deduplicadas para garantir unicidade.
+Essa estrutura facilita análises sob diferentes perspectivas (clientes, produtos, regiões, datas e envios).
 
-Foram atribuídas chaves substitutas estáveis (FARM_FINGERPRINT) para relacionamento entre tabelas, mantendo também os IDs naturais (ex.: customer_ID, product_id) para rastreabilidade.
+👉 [Visualizar o diagrama](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Modelo%20Dimensional%20-%20An%C3%A1lise%20de%20Vendas%20(Star%20Schema).pdf)
 
-Para apoiar a construção do **modelo dimensional**, utilizei a ferramenta `Lucidchart`, que permitiu representar visualmente o relacionamento entre a tabela fato (FactSales) e as tabelas de dimensão (DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket).
+### 🔵 Criar estrutura de base de dados (tabelas de fatos e dimensões)
 
-No diagrama, a tabela fato (FactSales) está no centro, conectada às tabelas de dimensão (DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket). Essa estrutura em estrela facilita análises por diferentes perspectivas, como clientes, produtos, regiões, datas e modos de envio. Esse diagrama facilita a compreensão da estrutura em estrela (Star Schema) e como as chaves primárias das dimensões se conectam às chaves estrangeiras da tabela fato.
+As tabelas foram implementadas no BigQuery:
 
-📌 Link para visualização do esquema no Lucidchart:
-👉 [Clique aqui para acessar o diagrama](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Modelo%20Dimensional%20-%20An%C3%A1lise%20de%20Vendas%20(Star%20Schema).pdf)
+- **FactSales** → núcleo do modelo, contendo métricas de vendas.
 
-### 🔵  Criar estrutura de base de dados (tabelas de fatos e dimensões)
+- **DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket** → fornecem contexto descritivo.
 
-As tabelas de fatos e dimensões foram implementadas no BigQuery seguindo as boas práticas de modelagem dimensional. O modelo adota:
+📌 **Boas Práticas Aplicadas**
 
-FactSales: núcleo central do esquema estrela, com métricas de vendas.
+- Modelagem estrela → simplicidade e eficiência em consultas OLAP.
 
-DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket: dimensões que fornecem contexto descritivo às análises.
+- Chaves primárias das dimensões como chaves estrangeiras na fato.
 
-📝 **Observações Técnicas**
+- Surrogate keys via FARM_FINGERPRINT para unicidade e joins eficientes.
 
-O modelo segue a modelagem estrela, favorecendo simplicidade e eficiência em consultas OLAP.
+- FactSales contém apenas dados normalizados e referenciados.
 
-Chaves primárias das dimensões foram usadas como chaves estrangeiras na fato.
-
-IDs gerados via FARM_FINGERPRINT asseguram unicidade e performance em joins.
-
-A tabela FactSales contém apenas dados normalizados e referenciados, otimizando armazenamento e processamento.
-
-📌 Link para visualização do esquema:
-👉 [Clique aqui para acessar a Estrutura do modelo dimensional](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Estrutura_Modelo_Dimesional.md)
+👉 [Estrutura detalhada do modelo dimensional](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Estrutura_Modelo_Dimesional.md)
   
 ### 🔵  Agendar atualizações de tabelas
+
+Para garantir que a base se mantenha atualizada, foi projetado um pipeline lógico de atualização, considerando dependências entre tabelas:
+
+Superstore (tabela bruta) → dados de entrada.
+
+superstore_cleaned (intermediária) → remoção de duplicatas e padronização.
+
+Dimensões (DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket) → devem ser atualizadas antes da fato.
+
+FactSales → última a ser atualizada, consolidando métricas e conectando dimensões.
+
+⚠️ Importante: neste projeto, o pipeline foi apenas projetado conceitualmente, sem automação em ferramentas externas.
