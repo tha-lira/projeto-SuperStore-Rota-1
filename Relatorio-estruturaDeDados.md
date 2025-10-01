@@ -166,3 +166,49 @@ Dimensões (DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket)
 FactSales → última a ser atualizada, consolidando métricas e conectando dimensões.
 
 ⚠️ Importante: neste projeto, o pipeline foi apenas projetado conceitualmente, sem automação em ferramentas externas.
+
+### 🔵 Conclusão Final e Próximos Passos
+
+Ao longo deste projeto, foi desenvolvido um processo completo de ETL (Extract, Transform, Load) aplicado ao dataset da Super Store, com foco na construção de uma estrutura dimensional (Star Schema) para análise eficiente de dados.
+
+📌 **Principais Entregas**
+
+**Qualidade dos Dados**:
+
+- Verificação completa de nulos → nenhum valor ausente encontrado.
+
+- Identificação e tratamento de duplicados → 35 registros redundantes removidos.
+
+- Tratamento de inconsistências → padronização de variáveis categóricas e análise de métricas discrepantes (ex.: lucro negativo).
+
+**Tabela Intermediária (superstore_cleaned)**:
+
+- Base consolidada e limpa, utilizada como fonte confiável para construção do modelo dimensional.
+
+**Pesquisa de Outras Fontes**:
+
+- Integração de dados externos sobre redes de supermercados multinacionais via IMPORTHTML.
+
+- Tratamento de inconsistências e seleção de variáveis relevantes para benchmarking internacional.
+
+**Modelagem Dimensional**:
+
+- Estrutura em estrela construída no BigQuery, com a FactSales no centro conectada às dimensões DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode e DimMarket.
+
+- Aplicação de boas práticas: surrogate keys, padronização textual e deduplicação de dimensões.
+
+- Diagrama visual criado no Lucidchart, facilitando a compreensão do modelo.
+
+**Pipeline de Atualização (conceitual)**:
+
+- Definição da ordem lógica de atualização das tabelas (da bruta até a fato).
+
+📊 **Benefícios da Solução**
+
+- Garantia de integridade e consistência dos dados.
+
+- Estrutura escalável e otimizada para consultas analíticas (OLAP).
+
+- Possibilidade de análises sob diferentes perspectivas (clientes, produtos, regiões, períodos, modos de envio).
+
+- Base integrada para benchmarking internacional, permitindo comparação com grandes redes multinacionais.
