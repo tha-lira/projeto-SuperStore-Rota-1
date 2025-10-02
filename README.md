@@ -37,16 +37,16 @@ SQL (BigQuery)
 A seguir, estão os principais componentes e entregas deste projeto:
 
 📌 [Documentação Técnica](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Relatorio-estruturaDeDados.md)
-📝 Documentação detalhada sobre a modelagem, análise e decisões do projeto.
+- 📝 Documentação detalhada sobre a modelagem, análise e decisões do projeto.
 
 📌 [Consultas no BigQuery](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/BigQuery-estruturaDeDados.md)
-💻 Consultas SQL para análise de vendas, clientes, produtos e desempenho por região.
+- 💻 Consultas SQL para análise de vendas, clientes, produtos e desempenho por região.
 
 📌 [Estrutura do modelo dimensional](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Estrutura_Modelo_Dimesional.md)
-📊 Modelo em Estrela com a tabela fato central e tabelas de dimensão relacionadas.
+- 📊 Modelo em Estrela com a tabela fato central e tabelas de dimensão relacionadas.
 
 📌 [Modelo Dimensional](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Modelo%20Dimensional%20-%20An%C3%A1lise%20de%20Vendas%20(Star%20Schema).pdf)
-🗂️ Visualização do modelo no formato PDF.
+- 🗂️ Visualização do modelo no formato PDF.
 
 📌 [Dataset Original](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Dataset-Original.md)
-📚 Dicionário de dados completo com tipos, exemplos e descrições das variáveis.
+- 📚 Dicionário de dados completo com tipos, exemplos e descrições das variáveis.
