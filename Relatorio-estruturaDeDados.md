@@ -6,7 +6,7 @@
 A Super Store precisa organizar e estruturar seus dados para facilitar consultas, análises e decisões estratégicas.
 
 **Objetivo**:
-Construir um sistema tabular relacional utilizando o modelo dimensional, com tabelas fato e dimensão, alimentado por um processo ETL (Extract, Transform, Load).
+Construir um sistema tabular relacional utilizando o modelo dimensional (star schema), com tabelas fato e dimensão, alimentado por um processo **ETL (Extract, Transform, Load)**.
 
 ## 🟦 2.1 Processar e preparar base de dados
 
@@ -16,21 +16,25 @@ Construir um sistema tabular relacional utilizando o modelo dimensional, com tab
 - **Dataset Principal:** `dataBase`  
 - **Tabela Bruta:** `superstore`
 
+Os dados foram carregados para o BigQuery, servindo como base inicial para as etapas de limpeza, padronização e modelagem dimensional.
+
 ### 🔵 Identificar e tratar valores nulos
 
 Foi aplicada a query `SUM(CASE WHEN coluna IS NULL THEN 1 ELSE 0 END)` em todas as colunas da base `superstore`.  
 
-**Resultado:** Nenhuma coluna apresentou valores nulos entre as 51.290 linhas avaliadas.
+**Resultado**: Nenhuma coluna apresentou valores nulos entre as 51.290 linhas avaliadas.
+
+✅ Isso indica que a base inicial já possuía consistência em termos de preenchimento de campos obrigatórios.
 
 ### 🔵  Identificar e tratar valores duplicados
 
 A análise de duplicidade foi realizada em diferentes níveis:
 
-- 1ª verificação: `order_id + product_id` → encontrados 38 duplicados.
-- 2ª verificação (mais refinada):` customer_ID + region + product_name` → total caiu para 33.
-- Verificação final: construída chave composta (`customer_ID + order_id + product_id + order_date + ship_date`) para confirmar duplicados reais.
+- `order_id + product_id` → encontrados 38 duplicados.
+- ` customer_ID + region + product_name` → total caiu para 33.
+- Verificação final: Chave composta (`customer_ID + order_id + product_id + order_date + ship_date`) → 35 duplicados confirmados.
 
-**Resultado final:**
+📊 **Resumo da Análise de Duplicados**
 
 | Métrica         | Valor   |
 |-----------------|---------|
@@ -38,21 +42,24 @@ A análise de duplicidade foi realizada em diferentes níveis:
 | Linhas únicas   | 51.255  |
 | Duplicados      | 35      |
 
-📌 **Interpretação**: Os 35 registros duplicados eram idênticos em todas as colunas-chave, indicando redundância sem informação nova. Se não tratados, poderiam distorcer métricas como vendas, lucro e quantidade.
+📌 **Interpretação**: Os 35 registros eram totalmente redundantes, sem novas informações. Se não tratados, poderiam distorcer métricas como vendas, lucro e quantidade.
 
 ✅ **Ação Tomada**: Foi criada a tabela intermediária `superstore_cleaned` com as duplicatas removidas, garantindo a integridade das futuras tabelas fato e dimensão.
 
 ### 🔵 Identificar e tratar dados discrepantes 
 
-Também foi realizada uma análise de possíveis inconsistências em variáveis numéricas e categóricas.
+Foi realizada uma análise de consistência em variáveis numéricas e categóricas:
 
-- **Padronização aplicada**: funções LOWER() e TRIM() em variáveis de texto para evitar discrepâncias de maiúsculas/minúsculas ou espaços extras.
+- **Padronização aplicada**: uso de **LOWER()** e **TRIM()** para variáveis textuais, garantindo uniformidade.
+  
+- **FactSales**: 
+- 51.255 registros válidos.
 
-- **FactSales**: 51.255 registros válidos, sem valores nulos nas métricas principais.
+- Nenhum nulo nas métricas principais.
 
-- **Profit (Lucro**): 12.541 registros (24,5%) com valores negativos, possivelmente indicando devoluções, descontos excessivos ou ajustes financeiros.
+- 12.541 registros (24,5%) com profit < 0.
 
-- Demais dimensões (DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode e DimMarket): nenhuma inconsistência relevante foi identificada.
+Esses valores negativos foram investigados em função dos descontos aplicados.
 
 ### 🔷 Análise de Lucro Negativo
 
@@ -74,23 +81,21 @@ Os registros de lucro negativo foram segmentados por faixa de desconto:
 
 - Acima de 30% de desconto, a maioria esmagadora dos pedidos gera lucro negativo (92,45%).
 
-✅ **Considerações Finais**
-
-Esse padrão sugere forte impacto dos descontos elevados na rentabilidade. Recomenda-se revisar a política de descontos e investigar se esses valores decorrem de promoções planejadas ou de falhas nos processos de precificação.
+✅ **Recomendação**: revisar a política de descontos, investigando se os valores decorrem de promoções planejadas ou falhas nos processos de precificação.
 
 ### 🔷 Tabela Intermediária Criada
 
-Tabela Intermediária: `superstore_cleaned`
+Foi criada a tabela consolidada `superstore_cleaned`, com **51.255 registros válidos**, livre de duplicados e com variáveis padronizadas.
 
 **Variáveis disponíveis:**  
 `customer_ID, customer_name, segment, product_id, product_name, category, sub_category, order_id, row_id, order_date, ship_date, sales, profit, quantity, discount, shipping_cost, order_priority, ship_mode, region, city, state, country, market, market2, year, weeknum, unknown, rn`
 
 ### 🔵 Pesquisar dados de outras fontes
 
-Para enriquecer a análise, foram integrados dados de concorrentes multinacionais de supermercados.
+Para enriquecer a análise, foram integrados dados de concorrentes internacionais.
 
 📌 **Coleta dos Dados**
-A extração foi realizada por meio de web scraping com a função IMPORTHTML do Google Planilhas, aplicada à página da Wikipedia:
+A extração foi realizada por meio de **web scraping** com a função `IMPORTHTML` do Google Planilhas, aplicada à página da Wikipedia:
 
 ```
 =IMPORTHTML("https://en.wikipedia.org/wiki/List_of_supermarket_chains","table",1)
@@ -112,103 +117,103 @@ Tabela com informações limpas de empresas, suas sedes e países de atuação. 
 
 ### 🔵 Projetar estrutura de base de dados (tabelas de fatos e dimensões)
 
-Foi adotado o modelo dimensional (star schema), no qual:
+Foi adotado o modelo dimensional (star schema):
 
-**Tabelas de Dimensão** → armazenam atributos descritivos (quem, o quê, onde, quando).
+Tabelas de Dimensão: armazenam atributos descritivos (quem, o quê, onde, quando).
 
-**Tabela Fato** → registra eventos transacionais e métricas (vendas, lucro, quantidade).
+Tabela Fato (FactSales): centraliza eventos transacionais com métricas (vendas, lucro, quantidade).
 
-📌 **Padronização**
+📌 **Boas práticas aplicadas**:
 
-- Uso de LOWER() e TRIM() para evitar inconsistências textuais.
+Uso de LOWER() e TRIM() → padronização textual.
 
-- Deduplicação das dimensões.
+Deduplicação de dimensões.
 
-- Criação de surrogate keys com FARM_FINGERPRINT, mantendo IDs naturais para rastreabilidade.
+Chaves substitutas (FARM_FINGERPRINT) → garantem unicidade, mantendo IDs naturais para rastreabilidade.
 
-📌 **Modelagem Visual**
-O modelo foi representado no Lucidchart, destacando a FactSales no centro, conectada às dimensões DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode e DimMarket.
-
-Essa estrutura facilita análises sob diferentes perspectivas (clientes, produtos, regiões, datas e envios).
+📌 **Representação Visual**:
+O diagrama foi elaborado no Lucidchart, com a FactSales no centro, conectada às dimensões DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode e DimMarket.
 
 👉 [Visualizar o diagrama](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Modelo%20Dimensional%20-%20An%C3%A1lise%20de%20Vendas%20(Star%20Schema).pdf)
 
 ### 🔵 Criar estrutura de base de dados (tabelas de fatos e dimensões)
 
-As tabelas foram implementadas no BigQuery:
+**FactSales**: núcleo central do modelo, com métricas de vendas.
 
-- **FactSales** → núcleo do modelo, contendo métricas de vendas.
+**DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket**: tabelas descritivas de suporte.
 
-- **DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket** → fornecem contexto descritivo.
+📌 **Observações Técnicas**:
 
-📌 **Boas Práticas Aplicadas**
+Modelo em estrela → consultas OLAP mais simples e rápidas.
 
-- Modelagem estrela → simplicidade e eficiência em consultas OLAP.
+Chaves primárias das dimensões usadas como FK na fato.
 
-- Chaves primárias das dimensões como chaves estrangeiras na fato.
+Surrogate keys via FARM_FINGERPRINT → unicidade e joins eficientes.
 
-- Surrogate keys via FARM_FINGERPRINT para unicidade e joins eficientes.
-
-- FactSales contém apenas dados normalizados e referenciados.
+FactSales contém apenas dados normalizados e referenciados.
 
 👉 [Estrutura detalhada do modelo dimensional](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Estrutura_Modelo_Dimesional.md)
   
 ### 🔵  Agendar atualizações de tabelas
 
-Para garantir que a base se mantenha atualizada, foi projetado um pipeline lógico de atualização, considerando dependências entre tabelas:
+Foi projetado um pipeline lógico de atualização, considerando dependências:
 
-Superstore (tabela bruta) → dados de entrada.
+1. Superstore (bruta): dados de entrada.
 
-superstore_cleaned (intermediária) → remoção de duplicatas e padronização.
+2. superstore_cleaned (intermediária): remoção de duplicatas e padronização.
 
-Dimensões (DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket) → devem ser atualizadas antes da fato.
+3. Dimensões: atualizadas em seguida (DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode, DimMarket).
 
-FactSales → última a ser atualizada, consolidando métricas e conectando dimensões.
+4. FactSales: última a ser atualizada, consolidando métricas e conectando dimensões.
 
-⚠️ Importante: neste projeto, o pipeline foi apenas projetado conceitualmente, sem automação em ferramentas externas.
+⚠️ Neste projeto, o pipeline foi projetado apenas conceitualmente, sem automação.
 
 ### 🔵 Conclusão Final e Próximos Passos
-
-Ao longo deste projeto, foi desenvolvido um processo completo de ETL (Extract, Transform, Load) aplicado ao dataset da Super Store, com foco na construção de uma estrutura dimensional (Star Schema) para análise eficiente de dados.
 
 📌 **Principais Entregas**
 
 **Qualidade dos Dados**:
 
-- Verificação completa de nulos → nenhum valor ausente encontrado.
+- Nenhum nulo.
 
-- Identificação e tratamento de duplicados → 35 registros redundantes removidos.
+- 35 duplicados removidos.
 
-- Tratamento de inconsistências → padronização de variáveis categóricas e análise de métricas discrepantes (ex.: lucro negativo).
+- Análise de lucros negativos relacionada a descontos.
 
-**Tabela Intermediária (superstore_cleaned)**:
+**Tabela Intermediária**:
 
-- Base consolidada e limpa, utilizada como fonte confiável para construção do modelo dimensional.
+- superstore_cleaned como base confiável para modelagem.
 
-**Pesquisa de Outras Fontes**:
+**Dados Externos**:
 
-- Integração de dados externos sobre redes de supermercados multinacionais via IMPORTHTML.
-
-- Tratamento de inconsistências e seleção de variáveis relevantes para benchmarking internacional.
+- Benchmarking internacional com supermercados multinacionais.
 
 **Modelagem Dimensional**:
 
-- Estrutura em estrela construída no BigQuery, com a FactSales no centro conectada às dimensões DimCustomer, DimProduct, DimDate, DimRegion, DimShipMode e DimMarket.
+- Estrutura em estrela no BigQuery.
 
-- Aplicação de boas práticas: surrogate keys, padronização textual e deduplicação de dimensões.
+- Diagrama criado no Lucidchart.
 
-- Diagrama visual criado no Lucidchart, facilitando a compreensão do modelo.
+**Pipeline (conceitual)**:
 
-**Pipeline de Atualização (conceitual)**:
-
-- Definição da ordem lógica de atualização das tabelas (da bruta até a fato).
+- Sequência lógica definida para atualização das tabelas.
 
 📊 **Benefícios da Solução**
 
 - Garantia de integridade e consistência dos dados.
 
-- Estrutura escalável e otimizada para consultas analíticas (OLAP).
+- Estrutura escalável e otimizada para consultas analíticas.
 
-- Possibilidade de análises sob diferentes perspectivas (clientes, produtos, regiões, períodos, modos de envio).
+- Possibilidade de análises sob múltiplas perspectivas (clientes, produtos, regiões, períodos, modos de envio).
 
-- Base integrada para benchmarking internacional, permitindo comparação com grandes redes multinacionais.
+- Base integrada para benchmarking internacional.
+
+🚀** Próximos Passos**
+
+1. Automatizar o pipeline de atualização (Airflow, Dataflow ou Cloud Composer).
+
+2. Aplicar Slowly Changing Dimensions (SCD) para rastrear mudanças históricas em dimensões (ex.: mudança de região ou segmento de cliente).
+
+3. Construir dashboards no Power BI ou Looker Studio para apoiar decisões gerenciais.
+
+4. Implantar monitoramento de qualidade dos dados (checagem periódica de nulos, duplicados e discrepâncias).
