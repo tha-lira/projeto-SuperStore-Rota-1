@@ -1,8 +1,8 @@
-# Documentação Técnica - Estrutura de Dados
+# Documentação Técnica – Estrutura de Dados (Projeto Super Store)
 
-### 🔍 Identificar valores nulos
+## 1. Identificação e Tratamento de Dados Nulos
 
--- 🔎 Contagem total de linhas e verificação de valores nulos em todas as colunas
+Para garantir qualidade dos dados, foi feita uma análise de valores nulos em todas as colunas principais da tabela superstore.
 
 ```
 SELECT
@@ -39,10 +39,11 @@ SELECT
 
 FROM `estrutura-de-dados-473122.dataBase.superstore`;
 ```
+Resultado: Nenhum valor nulo foi identificado, garantindo integridade dos campos obrigatórios.
 
-### 🔍 Identificar valores duplicados
+## 2. Identificação e Tratamento de Dados Duplicados
 
--- 🔎 Verifica registros duplicados considerando apenas order_id + product_id
+2.1 Checagem inicial por chave (order_id, product_id)
 
 ```
 -- A ideia é checar se há o mesmo produto repetido dentro de um mesmo pedido.
@@ -56,7 +57,7 @@ GROUP BY order_id, product_id
 HAVING COUNT(*) > 1;  -- Retorna apenas os pares que aparecem mais de uma vez
 ```
 
--- 🔎 Refinamento: verifica duplicados considerando mais colunas (chave lógica mais forte)
+2.2 Checagem refinada por chave composta lógica
 
 ```
 -- Aqui agrupamos por customer_ID, order_id, product_id, region e product_name
@@ -75,7 +76,7 @@ HAVING COUNT(*) > 1 -- Retorna apenas combinações que se repetem
 ORDER BY qtd_duplicados DESC; -- Ordena para visualizar os casos mais frequentes primeiro
 ```
 
--- 🔎 Cálculo final do total de duplicados
+2.3 Quantificação total de duplicados pela chave composta (customer_ID, order_id, product_id, order_date, ship_date)
 
 ```
 -- Estratégia: criar uma chave composta (customer_ID + order_id + product_id + order_date + ship_date)
@@ -91,7 +92,7 @@ FROM `estrutura-de-dados-473122.dataBase.superstore`;
 
 ---
 
--- 🔎 Criação da tabela sem duplicados 
+2.4 Remoção dos duplicados
 
 ```
 CREATE TABLE `estrutura-de-dados-473122.dataBase.superstore_cleaned` AS
@@ -126,9 +127,11 @@ customer_id, order_id, product_id, order_date, ship_date
 
 ---
 
-### 🔍 Criaçao das tabelas de fatos e dimensões
+## 3. Criação das Tabelas Dimensão e Fato (Modelo Estrela)
 
-1. Tabela Fato – FactSales
+3.1 Tabela Fato – FactSales
+
+Tabela central com métricas e chaves substitutas para dimensões.
 
 ```
 CREATE OR REPLACE TABLE `estrutura-de-dados-473122.dataBase.FactSales`
@@ -172,7 +175,9 @@ SELECT
 FROM `estrutura-de-dados-473122.dataBase.superstore_cleaned` sc;
 ```
 
-2. Tabela de Dimensão - DimCustomer
+3.2 Tabelas Dimensão
+
+DimCustomer
 
 ```
 CREATE OR REPLACE TABLE `estrutura-de-dados-473122.dataBase.DimCustomer` AS
@@ -185,7 +190,7 @@ FROM `estrutura-de-dados-473122.dataBase.superstore_cleaned`
 WHERE customer_id IS NOT NULL;
 ```
 
-3. Tabela de Dimensão - DimProduct
+Tabela de Dimensão - DimProduct
 
 ```
 CREATE OR REPLACE TABLE `estrutura-de-dados-473122.dataBase.DimProduct` AS
@@ -199,7 +204,7 @@ FROM `estrutura-de-dados-473122.dataBase.superstore_cleaned`
 WHERE product_id IS NOT NULL;
 ```
 
-4. Tabela de Dimensão - DimDate
+Tabela de Dimensão - DimDate
 
 ```
 CREATE OR REPLACE TABLE `estrutura-de-dados-473122.dataBase.DimDate` AS
@@ -220,7 +225,7 @@ FROM dates
 ORDER BY dt;
 ```
 
-5. Tabela de Dimensão - DimRegion
+Tabela de Dimensão - DimRegion
  
 ```
 CREATE OR REPLACE TABLE `estrutura-de-dados-473122.dataBase.DimRegion` AS
@@ -239,7 +244,7 @@ FROM `estrutura-de-dados-473122.dataBase.superstore_cleaned`
 WHERE region IS NOT NULL OR city IS NOT NULL OR state IS NOT NULL OR country IS NOT NULL;
 ```
 
-6. Tabela de Dimensão - DimShipMode
+Tabela de Dimensão - DimShipMode
 
 ```
 CREATE OR REPLACE TABLE `estrutura-de-dados-473122.dataBase.DimShipMode` AS
@@ -252,7 +257,7 @@ WHERE
   ship_mode IS NOT NULL;
 ```
 
-7. Tabela de Dimensão - DimMarket
+Tabela de Dimensão - DimMarket
 
 ```
 CREATE OR REPLACE TABLE `estrutura-de-dados-473122.dataBase.DimMarket` AS
@@ -264,8 +269,8 @@ FROM `estrutura-de-dados-473122.dataBase.superstore_cleaned`
 WHERE market IS NOT NULL;
 ```
 
-### 🔍 dentificar dados discrepantes em variáveis ​​numérica
-
+4. Análise de Dados Discrepantes: Lucro Negativo vs Faixa de Desconto
+   
 ```
 -- Investigar se esta associada a alta incidencia de lucro negativo ao desconto gerado ao cliente.
 
@@ -288,3 +293,9 @@ GROUP BY
 ORDER BY
   faixa_desconto;
 ```
+
+**Interpretação:
+
+Pedidos com maiores descontos (>30%) apresentam alta incidência (>90%) de lucro negativo.
+
+Recomenda-se revisão da política de descontos e estratégias de precificação.**
