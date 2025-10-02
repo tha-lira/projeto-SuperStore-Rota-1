@@ -1,12 +1,38 @@
 # 🧪 Projeto de Exploração – Estrutura de Dados (ETL)
 
-A Super Store enfrenta o desafio de lidar com grandes volumes de dados dispersos e não estruturados. Para resolver esse problema e impulsionar a tomada de decisões estratégicas, propõe-se a implementação de um sistema robusto de ETL (Extract, Transform, Load) com base em um modelo de dados dimensional (Fato e Dimensões).
+**Contexto**:
+A Super Store, líder no setor varejista, enfrenta o desafio de gerenciar grandes volumes de dados desestruturados, dificultando análises estratégicas.
 
-Este projeto tem como objetivo desenvolver uma estrutura abrangente que permita extrair dados de diversas fontes, transformá-los conforme as necessidades analíticas da Super Store e carregá-los de forma eficiente em um Data Warehouse (como o Google BigQuery). Com isso, a empresa poderá identificar padrões de comportamento, tendências de mercado e oportunidades de negócio com maior precisão e velocidade.
+**Objetivo**:
+Implementar um sistema robusto de ETL (Extrair, Transformar e Carregar) com tabelas fato e dimensão para melhorar o armazenamento e permitir análises avançadas que suportem decisões ágeis e competitivas.
 
----
+**Benefícios esperados**:
 
-🧭 Documentação Técnica
+- Identificação de padrões e oportunidades de mercado
+
+- Melhoria da eficiência operacional
+
+- Vantagem competitiva sustentável
+
+## Ferramentas, Linguagens e Dados Utilizados
+
+**Ferramentas**:
+
+- BigQuery 
+
+- Google Sheets 
+
+**Linguagens**:
+
+SQL (BigQuery)
+
+**Dados**:
+
+- Tabela principal de vendas da [Super Store](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Dataset-Original.md)
+
+- Dados externos de concorrentes internacionais (web scraping)
+
+## 🧭 Documentação Técnica
 
 A seguir, estão os principais componentes e entregas deste projeto:
 
