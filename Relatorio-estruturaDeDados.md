@@ -186,15 +186,6 @@ Consolidação de métricas, uso de FKs e referências às dimensões.
 
 O pipeline ainda não foi automatizado, mas está documentado e pronto para futura orquestração com ferramentas como Cloud Composer, Apache Airflow ou Dataform.
 
-3.4 Representação Visual do Pipeline
-
-O fluxo de atualização dos dados segue a seguinte sequência lógica:
-
-
-***/*/*/*/*/*/
-
-📌 Esse pipeline garante uma estrutura modular e escalável, facilitando futuras automações com ferramentas como Airflow, Dataflow ou Cloud Composer.
-
 3.5 Considerações sobre Slowly Changing Dimensions (SCD)
 
 O projeto contempla suporte futuro a **dimensões historicamente variantes (Slowly Changing Dimensions - SCD)**, fundamentais para garantir rastreabilidade e integridade temporal.
