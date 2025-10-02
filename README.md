@@ -50,3 +50,9 @@ A seguir, estão os principais componentes e entregas deste projeto:
 
 📌 [Dataset Original](https://github.com/tha-lira/projeto-SuperStore-Rota-1/blob/main/Dataset-Original.md)
 - 📚 Dicionário de dados completo com tipos, exemplos e descrições das variáveis.
+
+🎤 Apresentação do Projeto
+
+Além do relatório técnico, preparei uma apresentação em slides para comunicar os resultados de forma visual e objetiva.
+
+👉 [Clique aqui para acessar a apresentação completa](https://github.com/tha-lira/rota-complementar-superstore-laboratoria/blob/main/Projeto%20Super%20Store%20-%20ETL%20.pdf)
